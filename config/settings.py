@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,10 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     'corsheaders',
+
+    'apps.account',
+    'apps.order',
+    'apps.product',
 
 ]
 
@@ -79,6 +84,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+
+AUTH_USER_MODEL = 'account.User'
 
 
 # Database
@@ -131,9 +138,21 @@ USE_TZ = True
 
 LANGUAGES = (
     ('en', _('English')),
-    ('fr', _('French')),
-    ('uz', _('Uzbek')),
+    ('ru', _('Russian')),
+    ('uz', _('Uzbek'))
 )
+
+MODELTRANSLATION_LANGUAGES = ('en', 'ru', 'uz')
+
+MODELTRANSLATION_PREPOPULATE_LANGUAGE = 'en'
+
+MODELTRANSLATION_TRANSLATION_FILES = (
+
+)
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale/',
+]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -144,6 +163,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
