@@ -7,7 +7,7 @@ from .models import (
         )
 
 
-class ProductTranslationOptions(TranslationOptions):
+class CategoryTranslationOptions(TranslationOptions):
     fields = ('name', )
 
 
@@ -20,5 +20,5 @@ class ProductTranslations(TranslationOptions):
 
 
 translator.register(Product, ProductTranslations)
-translator.register(Category, TagTranslationOptions)
-translator.register(Tag, ProductTranslations)
+translator.register(Category, CategoryTranslationOptions)
+translator.register(Tag, TagTranslationOptions)

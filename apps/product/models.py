@@ -24,10 +24,10 @@ class Tag(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', null=True)
+    tags = models.ManyToManyField(Tag)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     views = models.PositiveIntegerField(default=0)
-    tags = models.ManyToManyField(Tag)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
@@ -48,6 +48,10 @@ class Product(models.Model):
     def average_rank(self):
         return sum(self.ranks.values_list('rank', flat=True))/(self.ranks.count())
 
+    @property
+    def get_lakes(self):
+        return self.likes.count()
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
@@ -63,9 +67,9 @@ class Trade(models.Model):
         (2, _('Outcome')),
     )
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='trades')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     action = models.IntegerField(choices=ACTION, default=1)
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     modified_date = models.DateTimeField(auto_now=True)
@@ -92,10 +96,10 @@ class Like(models.Model):
 
 
 class Rank(models.Model):
-    rank_choice = list(range(1, 11))
+    rank_choike = ((r, r) for r in range(1, 11))
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ranks')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    rank = models.PositiveIntegerField(default=0, choices=rank_choice, db_index=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    rank = models.PositiveSmallIntegerField(default=0, choices=rank_choike, db_index=True)
 
 
 class Comment(models.Model):
