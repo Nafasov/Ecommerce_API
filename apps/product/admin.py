@@ -36,8 +36,10 @@ class ProductAdmin(TranslationAdmin):
     inlines = [ProductImageInline]
     list_display = ('id', 'name', 'price', 'category', 'created_date')
     date_hierarchy = 'created_date'
+    filter_horizontal = ('tags', )
     search_fields = ('id', 'name')
     list_filter = ('category', 'tags')
+    readonly_fields = ('get_available', 'get_quantity', 'average_rank', 'get_lakes')
 
 
 @admin.register(Trade)
