@@ -73,3 +73,4 @@ class CommentAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_date'
     search_fields = ('id', 'product__name', )
     list_filter = ('parent', )
+    readonly_fields = ('top_level_comment_id', 'created_date')

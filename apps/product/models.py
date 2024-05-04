@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 
 from apps.account.models import User
 from django.utils.translation import gettext_lazy as _
@@ -113,7 +113,7 @@ class Comment(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
-    top_level_comment_id = models.IntegerField()
+    top_level_comment_id = models.IntegerField(null=True, blank=True, editable=False)
     comment = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
 
@@ -125,13 +125,15 @@ class Comment(models.Model):
         return Comment.objects.filter(top_level_comment_id=self.id)
 
 
-def pre_save_comment(self, sender, instance, *args, **kwargs):
-    if instance.comment:
-        instance.top_level_comment_id = instance.parent.top_level_comment_id
-    else:
-        instance.top_level_comment_id = instance.id
+def post_save_comment(sender, instance, created, *args, **kwargs):
+    if created:
+        if instance.parent:
+            instance.top_level_comment_id = instance.parent.top_level_comment_id
+        else:
+            instance.top_level_comment_id = instance.id
+        instance.save()
 
 
-pre_save.connect(pre_save_comment, sender=Comment)
+post_save.connect(post_save_comment, sender=Comment)
 
 
