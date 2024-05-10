@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'corsheaders',
     'django_celery_results',
+    'django_celery_beat',
 
     'apps.account',
     'apps.order',
