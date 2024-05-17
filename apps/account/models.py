@@ -54,6 +54,9 @@ class UserToken(models.Model):
     is_used = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return str(self.token)
+
 
 def user_token_pre_save(sender, instance, *args, **kwargs):
     if not instance.token:

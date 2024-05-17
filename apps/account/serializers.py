@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password, password_validators_help_texts
 
-from .models import User
+from .models import User, UserToken
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -43,4 +43,29 @@ class SendEmailSerializer(serializers.Serializer):
         email = attrs.get('email')
         if not User.objects.filter(email=email).exists():
             raise ValidationError('Email not registered')
+        return attrs
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    token = serializers.IntegerField()
+
+    class Meta:
+        fields = ['email', 'token']
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        token = attrs.get('token')
+        user = User.objects.get(email=email)
+        if not UserToken.objects.filter(user=user).exists():
+            raise ValidationError('Credentials is not valid')
+        user_token = UserToken.objects.filter(user=user).last()
+        if user_token.is_used:
+            raise ValidationError('Token is already used')
+        if str(user_token) != str(token):
+            raise ValidationError('Token does not match')
+        user_token.is_used = True
+        user.is_active = True
+        user_token.save()
+        user.save()
         return attrs

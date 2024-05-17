@@ -1,14 +1,19 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from .tasks import ecommerce_send_email
-
-
 from apps.account.models import User, UserToken
 from apps.account.serializers import (
     UserRegisterSerializer,
-    SendEmailSerializer
+    SendEmailSerializer,
+    VerifyEmailSerializer
 )
 
 
@@ -47,3 +52,24 @@ class SendEmailView(generics.GenericAPIView):
             'detail': 'Activation Token Code has been sent to your email.',
         }
         return Response(data, status=200)
+
+
+class VerifyEmailView(generics.GenericAPIView):
+    serializer_class = VerifyEmailSerializer
+    queryset = User.objects.all()
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = request.data['email']
+        user = get_object_or_404(User, email=email)
+        refresh = RefreshToken.for_user(user)
+        obtain_token = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        return Response(obtain_token, status=200)
+
+
+class LoginView(TokenObtainPairView):
+    pass
