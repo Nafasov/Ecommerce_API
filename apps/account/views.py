@@ -1,13 +1,13 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
-    TokenRefreshView,
 )
 
+from .permissions import IsOwnerOrReadOnly
 from .tasks import ecommerce_send_email
 from apps.account.models import User, UserToken
 from apps.account.serializers import (
@@ -16,6 +16,7 @@ from apps.account.serializers import (
     VerifyEmailSerializer,
     ChangePasswordSerializer,
     ResetPasswordSerializer,
+    UserProfileSerializer
 )
 
 
@@ -106,3 +107,19 @@ class ResetPasswordView(generics.GenericAPIView):
             'detail': 'Your password has been changed.',
         }
         return Response(data, status=200)
+
+
+class UserProfile(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserProfileSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_active = False
+        instance.save()
+        deta = {
+            'success': True,
+            'detail': 'Your account has been deactivated.',
+        }
+        return Response(deta, status=200)

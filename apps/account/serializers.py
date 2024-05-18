@@ -115,3 +115,10 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.save()
         return user
 
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'first_name', 'last_name', 'avatar', 'is_active', 'is_superuser', 'is_superuser', 'modified_date', 'created_date')
+
+
