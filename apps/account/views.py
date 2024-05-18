@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -13,7 +13,9 @@ from apps.account.models import User, UserToken
 from apps.account.serializers import (
     UserRegisterSerializer,
     SendEmailSerializer,
-    VerifyEmailSerializer
+    VerifyEmailSerializer,
+    ChangePasswordSerializer,
+    ResetPasswordSerializer,
 )
 
 
@@ -73,3 +75,34 @@ class VerifyEmailView(generics.GenericAPIView):
 
 class LoginView(TokenObtainPairView):
     pass
+
+
+class ChangePasswordView(generics.GenericAPIView):
+    serializer_class = ChangePasswordSerializer
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        date = {
+            'success': True,
+            'detail': 'Your password has been changed.',
+        }
+        return Response(date, status=200)
+
+
+class ResetPasswordView(generics.GenericAPIView):
+    serializer_class = ResetPasswordSerializer
+    queryset = User.objects.all()
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = {
+            'success': True,
+            'detail': 'Your password has been changed.',
+        }
+        return Response(data, status=200)

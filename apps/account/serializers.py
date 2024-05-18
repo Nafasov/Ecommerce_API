@@ -68,3 +68,50 @@ class VerifyEmailSerializer(serializers.Serializer):
         user_token.save()
         user.save()
         return attrs
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    password1 = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        old_password = attrs.get('old_password')
+        password1 = attrs.get('password1')
+        password2 = attrs.get('password2')
+        if not self.context['request'].user.check_password(old_password):
+            raise ValidationError('Old password does not match')
+        if old_password == password1:
+            raise ValidationError('Old password does not match')
+        if password1 != password2:
+            raise ValidationError('Passwords do not match')
+        return attrs
+
+    def create(self, validated_data):
+        password1 = validated_data.pop('password1')
+        user = self.context['request'].user
+        user.set_password(password1)
+        user.save()
+        return user
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        password1 = attrs.get('password')
+        password2 = attrs.get('password2')
+        if self.context['request'].user.check_password(password1):
+            raise ValidationError('Old password does not match')
+        if password1 != password2:
+            raise ValidationError('Passwords do not match')
+        return attrs
+
+    def create(self, validated_data):
+        password1 = validated_data.pop('password')
+        user = self.context['request'].user
+        user.set_password(password1)
+        user.save()
+        return user
+
